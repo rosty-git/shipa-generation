@@ -12,7 +12,7 @@ func main() {
 	router.Use(CORSMiddleware())
 	router.POST("/shipa-gen", src.Generate)
 
-	router.Run("localhost:8080")
+	router.Run(":8080")
 }
 
 func CORSMiddleware() gin.HandlerFunc {
