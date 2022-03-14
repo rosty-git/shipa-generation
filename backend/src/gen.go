@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"net/http"
+	"shipa-gen/src/cloudformation"
 	"shipa-gen/src/crossplane"
 	"shipa-gen/src/shipa"
 )
@@ -22,6 +23,8 @@ func Generate(c *gin.Context) {
 	switch cfg.Provider {
 	case "crossplane":
 		data = crossplane.Generate(cfg)
+	case "cloudformation":
+		data = cloudformation.Generate(cfg)
 	default:
 		c.IndentedJSON(http.StatusBadRequest, errors.New("not supported provider"))
 		return

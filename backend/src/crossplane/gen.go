@@ -3,7 +3,7 @@ package crossplane
 import (
 	"gopkg.in/yaml.v2"
 	"shipa-gen/src/shipa"
-	"strings"
+	"shipa-gen/src/utils"
 )
 
 const apiVersion = "shipa.crossplane.io/v1alpha1"
@@ -56,17 +56,9 @@ func genApp(cfg shipa.Config) *App {
 	app.Spec.ForProvider.TeamOwner = cfg.Team
 	app.Spec.ForProvider.Framework = cfg.Framework
 	app.Spec.ForProvider.Plan = cfg.Plan
-	app.Spec.ForProvider.Tags = parseValues(cfg.Tags)
+	app.Spec.ForProvider.Tags = utils.ParseValues(cfg.Tags)
 
 	return app
-}
-
-func parseValues(values string) (out []string) {
-	tokens := strings.Split(values, ",")
-	for _, t := range tokens {
-		out = append(out, strings.TrimSpace(t))
-	}
-	return
 }
 
 func genAppDeploy(cfg shipa.Config) *AppDeploy {

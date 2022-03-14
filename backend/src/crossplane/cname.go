@@ -14,5 +14,5 @@ type AppCnameSpec struct {
 type AppCnameForProvider struct {
 	App     string `yaml:"app"`
 	Cname   string `yaml:"cname"`
-	Encrypt bool   `json:"encrypt,omitempty"`
+	Encrypt bool   `yaml:"encrypt,omitempty"`
 }
