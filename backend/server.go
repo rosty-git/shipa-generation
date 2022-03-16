@@ -11,6 +11,7 @@ func main() {
 	router := gin.Default()
 	router.Use(CORSMiddleware())
 	router.POST("/shipa-gen", src.Generate)
+	router.POST("/shipa-gen/apps", src.GenerateApps)
 
 	router.Run(":8080")
 }

@@ -1,5 +1,9 @@
 package shipa
 
+type AppsConfig struct {
+	Apps []Config `json:"apps"`
+}
+
 type Config struct {
 	Provider  string `json:"provider"`
 	AppName   string `json:"appName"`
@@ -16,10 +20,19 @@ type Config struct {
 	Cname   string `json:"cname"`
 	Encrypt bool   `json:"encrypt"`
 
-	EnvName   string `json:"envName"`
-	EnvValue  string `json:"envValue"`
-	Norestart bool   `json:"norestart"`
-	Private   bool   `json:"private"`
+	// deprecated
+	EnvName string `json:"envName"`
+	// deprecated
+	EnvValue string `json:"envValue"`
+
+	Envs      []Env `json:"envs"`
+	Norestart bool  `json:"norestart"`
+	Private   bool  `json:"private"`
+}
+
+type Env struct {
+	Name  string `json:"name"`
+	Value string `json:"value"`
 }
 
 type Result struct {
