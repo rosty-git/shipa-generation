@@ -52,11 +52,13 @@ func genApp(cfg shipa.Config) *App {
 		Kind:       "App",
 	}
 	app.Metadata.Name = cfg.AppName
-	app.Spec.ForProvider.Name = cfg.AppName
-	app.Spec.ForProvider.TeamOwner = cfg.Team
-	app.Spec.ForProvider.Framework = cfg.Framework
-	app.Spec.ForProvider.Plan = cfg.Plan
-	app.Spec.ForProvider.Tags = utils.ParseValues(cfg.Tags)
+	app.Spec.ForProvider = AppForProvider{
+		Name:      cfg.AppName,
+		TeamOwner: cfg.Team,
+		Framework: cfg.Framework,
+		Plan:      cfg.Plan,
+		Tags:      utils.ParseValues(cfg.Tags),
+	}
 
 	return app
 }
@@ -71,12 +73,14 @@ func genAppDeploy(cfg shipa.Config) *AppDeploy {
 		Kind:       "AppDeploy",
 	}
 	appDeploy.Metadata.Name = cfg.AppName
-	appDeploy.Spec.ForProvider.App = cfg.AppName
-	appDeploy.Spec.ForProvider.Image = cfg.Image
-	appDeploy.Spec.ForProvider.RegistryUser = cfg.RegistryUser
-	appDeploy.Spec.ForProvider.RegistrySecret = cfg.RegistrySecret
-	appDeploy.Spec.ForProvider.Port = cfg.Port
-	appDeploy.Spec.ForProvider.PrivateImage = cfg.RegistryUser != "" || cfg.RegistrySecret != ""
+	appDeploy.Spec.ForProvider = AppDeployForProvider{
+		App:            cfg.AppName,
+		Image:          cfg.Image,
+		RegistryUser:   cfg.RegistryUser,
+		RegistrySecret: cfg.RegistrySecret,
+		Port:           cfg.Port,
+		PrivateImage:   cfg.RegistryUser != "" || cfg.RegistrySecret != "",
+	}
 
 	return appDeploy
 }
@@ -91,15 +95,17 @@ func genAppCname(cfg shipa.Config) *AppCname {
 		Kind:       "AppCname",
 	}
 	appCname.Metadata.Name = cfg.AppName
-	appCname.Spec.ForProvider.App = cfg.AppName
-	appCname.Spec.ForProvider.Cname = cfg.Cname
-	appCname.Spec.ForProvider.Encrypt = cfg.Encrypt
+	appCname.Spec.ForProvider = AppCnameForProvider{
+		App:     cfg.AppName,
+		Cname:   cfg.Cname,
+		Encrypt: cfg.Encrypt,
+	}
 
 	return appCname
 }
 
 func genAppEnv(cfg shipa.Config) *AppEnv {
-	if cfg.AppName == "" || cfg.EnvName == "" || cfg.EnvValue == "" {
+	if cfg.AppName == "" || len(cfg.Envs) == 0 {
 		return nil
 	}
 
@@ -108,13 +114,16 @@ func genAppEnv(cfg shipa.Config) *AppEnv {
 		Kind:       "AppEnv",
 	}
 	appEnv.Metadata.Name = cfg.AppName
-	appEnv.Spec.ForProvider.App = cfg.AppName
-	appEnv.Spec.ForProvider.AppEnv.Norestart = cfg.Norestart
-	appEnv.Spec.ForProvider.AppEnv.Private = cfg.Private
-	appEnv.Spec.ForProvider.AppEnv.Envs = append(appEnv.Spec.ForProvider.AppEnv.Envs, Env{
-		Name:  cfg.EnvName,
-		Value: cfg.EnvValue,
-	})
+	p := &appEnv.Spec.ForProvider
+	p.App = cfg.AppName
+	p.AppEnv.Norestart = cfg.Norestart
+	p.AppEnv.Private = cfg.Private
+	for _, env := range cfg.Envs {
+		p.AppEnv.Envs = append(p.AppEnv.Envs, Env{
+			Name:  env.Name,
+			Value: env.Value,
+		})
+	}
 
 	return appEnv
 }

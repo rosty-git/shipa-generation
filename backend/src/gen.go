@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"shipa-gen/src/cloudformation"
 	"shipa-gen/src/crossplane"
+	"shipa-gen/src/github"
 	"shipa-gen/src/shipa"
 )
 
@@ -19,19 +20,9 @@ func Generate(c *gin.Context) {
 		return
 	}
 
-	var data *shipa.Result
-	switch cfg.Provider {
-	case "crossplane":
-		data = crossplane.Generate(cfg)
-	case "cloudformation":
-		data = cloudformation.Generate(cfg)
-	default:
-		c.IndentedJSON(http.StatusBadRequest, errors.New("not supported provider"))
-		return
-	}
-
-	if data == nil {
-		c.IndentedJSON(http.StatusNoContent, errors.New("no data"))
+	data, err := generateApp(cfg)
+	if err != nil {
+		c.IndentedJSON(http.StatusBadRequest, err)
 		return
 	}
 
@@ -104,8 +95,14 @@ func generateApp(cfg shipa.Config) (*shipa.Result, error) {
 		data = crossplane.Generate(cfg)
 	case "cloudformation":
 		data = cloudformation.Generate(cfg)
+	case "github", "gitlab":
+		data = github.Generate(cfg)
 	default:
 		return nil, fmt.Errorf("not supported provider: %s", cfg.Provider)
+	}
+
+	if data == nil {
+		return nil, errors.New("not data was generated")
 	}
 
 	return data, nil

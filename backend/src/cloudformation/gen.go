@@ -95,7 +95,7 @@ func genAppDeploy(cfg shipa.Config) *AppDeploy {
 }
 
 func genAppEnv(cfg shipa.Config) *AppEnv {
-	if cfg.AppName == "" || cfg.EnvName == "" || cfg.EnvValue == "" {
+	if cfg.AppName == "" || len(cfg.Envs) == 0 {
 		return nil
 	}
 
@@ -113,10 +113,12 @@ func genAppEnv(cfg shipa.Config) *AppEnv {
 	p.App = cfg.AppName
 	p.Norestart = cfg.Norestart
 	p.Private = cfg.Private
-	p.Envs = append(p.Envs, Env{
-		Name:  cfg.EnvName,
-		Value: cfg.EnvValue,
-	})
+	for _, env := range cfg.Envs {
+		p.Envs = append(p.Envs, Env{
+			Name:  env.Name,
+			Value: env.Value,
+		})
+	}
 
 	return appEnv
 }
