@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"net/http"
+	"shipa-gen/src/ansible"
 	"shipa-gen/src/cloudformation"
 	"shipa-gen/src/crossplane"
 	"shipa-gen/src/github"
@@ -18,6 +19,13 @@ func Generate(c *gin.Context) {
 	if err := c.BindJSON(&cfg); err != nil {
 		c.IndentedJSON(http.StatusBadRequest, err)
 		return
+	}
+
+	if len(cfg.Envs) == 0 && cfg.EnvName != "" {
+		cfg.Envs = append(cfg.Envs, shipa.Env{
+			Name:  cfg.EnvName,
+			Value: cfg.EnvValue,
+		})
 	}
 
 	data, err := generateApp(cfg)
@@ -97,6 +105,8 @@ func generateApp(cfg shipa.Config) (*shipa.Result, error) {
 		data = cloudformation.Generate(cfg)
 	case "github", "gitlab":
 		data = github.Generate(cfg)
+	case "ansible":
+		data = ansible.Generate(cfg)
 	default:
 		return nil, fmt.Errorf("not supported provider: %s", cfg.Provider)
 	}

@@ -15,6 +15,11 @@ func Generate(cfg shipa.Config) *shipa.Result {
 	action.AppCname = genAppCname(cfg)
 	action.AppDeploy = genAppDeploy(cfg)
 
+	if action.App == nil && action.AppEnv == nil &&
+		action.AppCname == nil && action.AppDeploy == nil {
+		return nil
+	}
+
 	data, _ := yaml.Marshal(action)
 	return &shipa.Result{
 		Name:    "shipa-action.yml",
