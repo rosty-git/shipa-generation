@@ -11,6 +11,7 @@ import (
 	"shipa-gen/src/crossplane"
 	"shipa-gen/src/github"
 	"shipa-gen/src/shipa"
+	"shipa-gen/src/terraform"
 )
 
 func Generate(c *gin.Context) {
@@ -107,6 +108,8 @@ func generateApp(cfg shipa.Config) (*shipa.Result, error) {
 		data = github.Generate(cfg)
 	case "ansible":
 		data = ansible.Generate(cfg)
+	case "terraform":
+		data = terraform.Generate(cfg)
 	default:
 		return nil, fmt.Errorf("not supported provider: %s", cfg.Provider)
 	}
