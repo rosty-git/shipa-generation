@@ -1,8 +1,10 @@
 package main
 
 import (
-	"github.com/gin-gonic/gin"
+	"log"
 	"shipa-gen/src"
+
+	"github.com/gin-gonic/gin"
 )
 
 func main() {
@@ -13,7 +15,10 @@ func main() {
 	router.POST("/shipa-gen", src.Generate)
 	router.POST("/shipa-gen/apps", src.GenerateApps)
 
-	router.Run(":8080")
+	err := router.Run(":8080")
+	if err != nil {
+		log.Fatal(err)
+	}
 }
 
 func CORSMiddleware() gin.HandlerFunc {

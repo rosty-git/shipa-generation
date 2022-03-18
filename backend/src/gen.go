@@ -10,6 +10,7 @@ import (
 	"shipa-gen/src/cloudformation"
 	"shipa-gen/src/crossplane"
 	"shipa-gen/src/github"
+	"shipa-gen/src/pulumi"
 	"shipa-gen/src/shipa"
 	"shipa-gen/src/terraform"
 )
@@ -110,6 +111,8 @@ func generateApp(cfg shipa.Config) (*shipa.Result, error) {
 		data = ansible.Generate(cfg)
 	case "terraform":
 		data = terraform.Generate(cfg)
+	case "pulumi":
+		data = pulumi.Generate(cfg)
 	default:
 		return nil, fmt.Errorf("not supported provider: %s", cfg.Provider)
 	}
