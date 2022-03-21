@@ -19,9 +19,9 @@ func Generate(cfg shipa.Config) *shipa.Result {
 		content += genAppEnv(cfg)
 	}
 
-	//if hasAppDeploy(cfg) {
-	//	content += genAppDeploy(cfg)
-	//}
+	if hasAppDeploy(cfg) {
+		content += genAppDeploy(cfg)
+	}
 
 	return &shipa.Result{
 		Name:    "index.ts",
