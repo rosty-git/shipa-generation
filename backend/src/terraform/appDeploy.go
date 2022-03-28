@@ -3,7 +3,6 @@ package terraform
 import (
 	"fmt"
 	"shipa-gen/src/shipa"
-	"strconv"
 	"strings"
 )
 
@@ -17,43 +16,80 @@ func genAppDeploy(cfg shipa.Config) string {
 resource "shipa_app_deploy" "tf" {
   app = %s
   deploy {
-    image = "%s"
 %s
   }
   %s
 }
-`, getAppName(cfg), cfg.Image, genAppDeployOptional(cfg), dependsOnAppEnvOrApp(cfg))
+`, getAppName(cfg), genAppDeployParams(cfg), dependsOnAppEnvOrApp(cfg))
+}
+
+func genAppDeployParams(cfg shipa.Config) string {
+	const indent = "   "
+	out := []string{
+		fmt.Sprintf(`%s image = "%s"`, indent, cfg.Image),
+		genAppDeployConfig(cfg),
+	}
+
+	if cfg.Port != "" {
+		out = append(out, genAppDeployPort(cfg))
+	}
+
+	if cfg.RegistryUser != "" && cfg.RegistrySecret != "" {
+		out = append(out, genAppDeployRegistry(cfg))
+	}
+
+	return strings.Join(out, "\n")
 }
 
 func dependsOnAppEnvOrApp(cfg shipa.Config) string {
 	switch {
 	case hasAppEnv(cfg):
 		return "depends_on = [shipa_app_env.tf]"
-	case hasApp(cfg):
-		return "depends_on = [shipa_app.tf]"
 	default:
 		return ""
 	}
 }
 
-func genAppDeployOptional(cfg shipa.Config) string {
-	var out []string
-
-	if cfg.Port != "" {
-		out = append(out, fmt.Sprintf(`    port = %s`, cfg.Port))
+func genAppDeployConfig(cfg shipa.Config) string {
+	const indent = "     "
+	out := []string{
+		fmt.Sprintf(`%s team = "%s"`, indent, cfg.Team),
+		fmt.Sprintf(`%s framework = "%s"`, indent, cfg.Framework),
 	}
 
-	if cfg.RegistryUser != "" || cfg.RegistrySecret != "" {
-		out = append(out, fmt.Sprintf(`    private_image = %s`, strconv.FormatBool(true)))
+	if cfg.Plan != "" {
+		out = append(out, fmt.Sprintf(`%s plan = "%s"`, indent, cfg.Plan))
 	}
 
-	if cfg.RegistryUser != "" {
-		out = append(out, fmt.Sprintf(`    registry_user = "%s"`, cfg.RegistryUser))
+	tags := genTags(cfg)
+	if tags != "" {
+		out = append(out, fmt.Sprintf(`%s %s`, indent, tags))
 	}
 
-	if cfg.RegistrySecret != "" {
-		out = append(out, fmt.Sprintf(`    registry_secret = "%s"`, cfg.RegistrySecret))
+	params := strings.Join(out, "\n")
+	return fmt.Sprintf(`    app_config {
+%s
+    }`, params)
+}
+
+func genAppDeployPort(cfg shipa.Config) string {
+	if cfg.Port == "" {
+		return ""
 	}
 
-	return strings.Join(out, "\n")
+	return fmt.Sprintf(`    port {
+      number = %s
+      protocol = "TCP"
+    }`, cfg.Port)
+}
+
+func genAppDeployRegistry(cfg shipa.Config) string {
+	if cfg.RegistryUser == "" || cfg.RegistrySecret == "" {
+		return ""
+	}
+
+	return fmt.Sprintf(`    registry {
+      user = "%s"
+      secret = "%s"
+    }`, cfg.RegistryUser, cfg.RegistrySecret)
 }

@@ -22,9 +22,9 @@ resource "shipa_app_cname" "tf" {
 }
 
 func getAppName(cfg shipa.Config) string {
-	if hasApp(cfg) {
-		return "shipa_app.tf.app[0].name"
-	}
+	//if hasApp(cfg) {
+	//	return "shipa_app.tf.app[0].name"
+	//}
 
 	return fmt.Sprintf(`"%s"`, cfg.AppName)
 }

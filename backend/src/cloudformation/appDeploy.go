@@ -14,12 +14,28 @@ type MyShipaAppDeploy struct {
 }
 
 type AppDeployProperties struct {
-	App            string `yaml:"App"`
-	Image          string `yaml:"Image"`
-	PrivateImage   bool   `yaml:"PrivateImage,omitempty"`
-	RegistryUser   string `yaml:"RegistryUser,omitempty"`
-	RegistrySecret string `yaml:"RegistrySecret,omitempty"`
-	Port           string `yaml:"Port,omitempty"`
-	ShipaHost      string `yaml:"ShipaHost"`
-	ShipaToken     string `yaml:"ShipaToken"`
+	App        string    `yaml:"App"`
+	Image      string    `yaml:"Image"`
+	AppConfig  AppConfig `yaml:"AppConfig"`
+	Registry   *Registry `yaml:"Registry,omitempty"`
+	Port       *Port     `yaml:"Port,omitempty"`
+	ShipaHost  string    `yaml:"ShipaHost"`
+	ShipaToken string    `yaml:"ShipaToken"`
+}
+
+type Port struct {
+	Number   int64  `yaml:"Number"`
+	Protocol string `yaml:"Protocol"`
+}
+
+type Registry struct {
+	User   string `yaml:"User"`
+	Secret string `yaml:"Secret"`
+}
+
+type AppConfig struct {
+	Team      string   `yaml:"Team"`
+	Framework string   `yaml:"Framework"`
+	Plan      string   `yaml:"Plan,omitempty"`
+	Tags      []string `yaml:"Tags,omitempty"`
 }

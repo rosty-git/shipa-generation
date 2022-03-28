@@ -40,7 +40,7 @@ func getEnvs(cfg shipa.Config) string {
 }
 
 func dependsOnApp(cfg shipa.Config) string {
-	if hasApp(cfg) {
+	if hasApp(cfg) && !hasAppDeploy(cfg) {
 		return "depends_on = [shipa_app.tf]"
 	}
 	return ""

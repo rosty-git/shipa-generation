@@ -34,16 +34,56 @@ type AppCname struct {
 }
 
 type AppDeploy struct {
-	App            string `yaml:"app"`
-	Image          string `json:"image" yaml:"image"`
-	PrivateImage   bool   `json:"private-image,omitempty" yaml:"private-image,omitempty"`
-	RegistryUser   string `json:"registry-user,omitempty" yaml:"registry-user,omitempty"`
-	RegistrySecret string `json:"registry-secret,omitempty" yaml:"registry-secret,omitempty"`
-	Steps          int64  `json:"steps,omitempty" yaml:"steps,omitempty"`
-	StepWeight     int64  `json:"step-weight,omitempty" yaml:"step-weight,omitempty"`
-	StepInterval   string `json:"step-interval,omitempty" yaml:"step-interval,omitempty"`
-	Port           int64  `json:"port,omitempty" yaml:"port,omitempty"`
-	Detach         bool   `json:"detach" yaml:"detach"`
-	Message        string `json:"message,omitempty" yaml:"message,omitempty"`
-	ShipaYaml      string `json:"shipayaml,omitempty" yaml:"shipayaml,omitempty"`
+	App            string                   `json:"-" yaml:"app"`
+	Image          string                   `json:"image" yaml:"image"`
+	AppConfig      *AppDeployConfig         `json:"appConfig" yaml:"appConfig"`
+	CanarySettings *AppDeployCanarySettings `json:"canarySettings,omitempty" yaml:"canarySettings,omitempty"`
+	PodAutoScaler  *AppDeployPodAutoScaler  `json:"podAutoScaler,omitempty" yaml:"podAutoScaler,omitempty"`
+	Port           *AppDeployPort           `json:"port,omitempty" yaml:"port,omitempty"`
+	Registry       *AppDeployRegistry       `json:"registry,omitempty" yaml:"registry,omitempty"`
+	Volumes        []*AppDeployVolume       `json:"volumesToBind,omitempty" yaml:"volumesToBind,omitempty"`
+}
+
+type AppDeployConfig struct {
+	Team        string   `json:"team" yaml:"team"`
+	Framework   string   `json:"framework" yaml:"framework"`
+	Description string   `json:"description,omitempty" yaml:"description,omitempty"`
+	Env         []string `json:"env,omitempty" yaml:"env,omitempty"`
+	Plan        string   `json:"plan,omitempty" yaml:"plan,omitempty"`
+	Router      string   `json:"router,omitempty" yaml:"router,omitempty"`
+	Tags        []string `json:"tags,omitempty" yaml:"tags,omitempty"`
+}
+
+type AppDeployCanarySettings struct {
+	StepInterval int64 `json:"stepInterval" yaml:"stepInterval"`
+	StepWeight   int64 `json:"stepWeight" yaml:"stepWeight"`
+	Steps        int64 `json:"steps" yaml:"steps"`
+}
+
+type AppDeployPodAutoScaler struct {
+	MaxReplicas                    int64 `json:"maxReplicas" yaml:"maxReplicas"`
+	MinReplicas                    int64 `json:"minReplicas" yaml:"minReplicas"`
+	TargetCPUUtilizationPercentage int64 `json:"targetCPUUtilizationPercentage" yaml:"targetCPUUtilizationPercentage"`
+}
+
+type AppDeployPort struct {
+	Number   int64  `json:"number" yaml:"number"`
+	Protocol string `json:"protocol" yaml:"protocol"`
+}
+
+type AppDeployRegistry struct {
+	User   string `json:"user" yaml:"user"`
+	Secret string `json:"secret" yaml:"secret"`
+}
+
+type AppDeployVolume struct {
+	Name    string         `json:"volumeName" yaml:"volumeName"`
+	Path    string         `json:"volumeMountPath" yaml:"volumeMountPath"`
+	Options *VolumeOptions `json:"volumeMountOptions" yaml:"volumeMountOptions"`
+}
+
+type VolumeOptions struct {
+	Prop1 string `json:"additionalProp1" yaml:"additionalProp1"`
+	Prop2 string `json:"additionalProp2" yaml:"additionalProp2"`
+	Prop3 string `json:"additionalProp3" yaml:"additionalProp3"`
 }

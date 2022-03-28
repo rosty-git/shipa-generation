@@ -95,17 +95,27 @@ func newAppDeployTask() *AppDeployTask {
 }
 
 type AppDeploy struct {
-	Shipa          `yaml:",inline"`
-	App            string `yaml:"app"`
-	Image          string `yaml:"image"`
-	PrivateImage   bool   `yaml:"private-image,omitempty"`
-	RegistryUser   string `yaml:"registry-user,omitempty"`
-	RegistrySecret string `yaml:"registry-secret,omitempty"`
-	Steps          int64  `yaml:"steps,omitempty"`
-	StepWeight     int64  `yaml:"step-weight,omitempty"`
-	StepInterval   string `yaml:"step-interval,omitempty"`
-	Port           int64  `yaml:"port,omitempty"`
-	Detach         bool   `yaml:"detach"`
-	Message        string `yaml:"message,omitempty"`
-	ShipaYaml      string `yaml:"shipayaml,omitempty"`
+	Shipa     `yaml:",inline"`
+	App       string     `yaml:"app"`
+	Image     string     `yaml:"image"`
+	AppConfig *AppConfig `yaml:"appConfig"`
+	Registry  *Registry  `yaml:"registry,omitempty"`
+	Port      *Port      `yaml:"port,omitempty"`
+}
+
+type Port struct {
+	Number   int64  `yaml:"number"`
+	Protocol string `yaml:"protocol"`
+}
+
+type Registry struct {
+	User   string `yaml:"user"`
+	Secret string `yaml:"secret"`
+}
+
+type AppConfig struct {
+	Team      string   `yaml:"team"`
+	Framework string   `yaml:"framework"`
+	Plan      string   `yaml:"plan,omitempty"`
+	Tags      []string `yaml:"tags,omitempty"`
 }

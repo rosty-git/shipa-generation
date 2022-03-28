@@ -10,11 +10,6 @@ import (
 func Generate(cfg shipa.Config) *shipa.Result {
 	play := newPlay()
 
-	app := genApp(cfg)
-	if app != nil {
-		play.Tasks = append(play.Tasks, app)
-	}
-
 	appEnv := genAppEnv(cfg)
 	if appEnv != nil {
 		play.Tasks = append(play.Tasks, appEnv)
@@ -28,6 +23,11 @@ func Generate(cfg shipa.Config) *shipa.Result {
 	appDeploy := genAppDeploy(cfg)
 	if appDeploy != nil {
 		play.Tasks = append(play.Tasks, appDeploy)
+	} else {
+		app := genApp(cfg)
+		if app != nil {
+			play.Tasks = append(play.Tasks, app)
+		}
 	}
 
 	data, _ := yaml.Marshal([]interface{}{play})
@@ -42,22 +42,48 @@ func genAppDeploy(cfg shipa.Config) *AppDeployTask {
 		return nil
 	}
 
-	var port int64
-	val, err := strconv.ParseInt(cfg.Port, 10, 64)
-	if err == nil {
-		port = val
-	}
 	t := newAppDeployTask()
 	t.AppDeploy = AppDeploy{
-		Shipa:          credentials,
-		App:            cfg.AppName,
-		Image:          cfg.Image,
-		RegistryUser:   cfg.RegistryUser,
-		RegistrySecret: cfg.RegistrySecret,
-		Port:           port,
-		PrivateImage:   cfg.RegistryUser != "" || cfg.RegistrySecret != "",
+		Shipa: credentials,
+		App:   cfg.AppName,
+		Image: cfg.Image,
+		AppConfig: &AppConfig{
+			Team:      cfg.Team,
+			Framework: cfg.Framework,
+			Plan:      cfg.Plan,
+			Tags:      utils.ParseValues(cfg.Tags),
+		},
+		Registry: genAppDeployRegistry(cfg),
+		Port:     genAppDeployPort(cfg),
 	}
 	return t
+}
+
+func genAppDeployPort(cfg shipa.Config) *Port {
+	if cfg.Port == "" {
+		return nil
+	}
+
+	port, err := strconv.ParseInt(cfg.Port, 10, 64)
+	if err != nil {
+		return nil
+	}
+
+	return &Port{
+		Number:   port,
+		Protocol: "TCP",
+	}
+}
+
+func genAppDeployRegistry(cfg shipa.Config) *Registry {
+	if cfg.RegistryUser == "" || cfg.RegistrySecret == "" {
+		return nil
+	}
+
+	return &Registry{
+		User:   cfg.RegistryUser,
+		Secret: cfg.RegistrySecret,
+	}
 }
 
 func genAppCname(cfg shipa.Config) *AppCnameTask {

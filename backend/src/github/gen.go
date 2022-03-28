@@ -10,10 +10,12 @@ import (
 func Generate(cfg shipa.Config) *shipa.Result {
 	var action Action
 
-	action.App = genApp(cfg)
 	action.AppEnv = genAppEnv(cfg)
 	action.AppCname = genAppCname(cfg)
 	action.AppDeploy = genAppDeploy(cfg)
+	if action.AppDeploy == nil {
+		action.App = genApp(cfg)
+	}
 
 	if action.App == nil && action.AppEnv == nil &&
 		action.AppCname == nil && action.AppDeploy == nil {
@@ -32,19 +34,44 @@ func genAppDeploy(cfg shipa.Config) *AppDeploy {
 		return nil
 	}
 
-	var port int64
-	val, err := strconv.ParseInt(cfg.Port, 10, 64)
-	if err == nil {
-		port = val
+	return &AppDeploy{
+		App:   cfg.AppName,
+		Image: cfg.Image,
+		AppConfig: &AppDeployConfig{
+			Team:      cfg.Team,
+			Framework: cfg.Framework,
+			Plan:      cfg.Plan,
+			Tags:      utils.ParseValues(cfg.Tags),
+		},
+		Registry: genAppDeployRegistry(cfg),
+		Port:     genAppDeployPort(cfg),
+	}
+}
+
+func genAppDeployRegistry(cfg shipa.Config) *AppDeployRegistry {
+	if cfg.RegistryUser == "" || cfg.RegistrySecret == "" {
+		return nil
 	}
 
-	return &AppDeploy{
-		App:            cfg.AppName,
-		Image:          cfg.Image,
-		RegistryUser:   cfg.RegistryUser,
-		RegistrySecret: cfg.RegistrySecret,
-		Port:           port,
-		PrivateImage:   cfg.RegistryUser != "" || cfg.RegistrySecret != "",
+	return &AppDeployRegistry{
+		User:   cfg.RegistryUser,
+		Secret: cfg.RegistrySecret,
+	}
+}
+
+func genAppDeployPort(cfg shipa.Config) *AppDeployPort {
+	if cfg.Port == "" {
+		return nil
+	}
+
+	port, err := strconv.ParseInt(cfg.Port, 10, 64)
+	if err != nil {
+		return nil
+	}
+
+	return &AppDeployPort{
+		Number:   port,
+		Protocol: "TCP",
 	}
 }
 

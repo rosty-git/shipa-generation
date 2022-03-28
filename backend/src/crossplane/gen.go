@@ -4,6 +4,7 @@ import (
 	"gopkg.in/yaml.v2"
 	"shipa-gen/src/shipa"
 	"shipa-gen/src/utils"
+	"strconv"
 )
 
 const apiVersion = "shipa.crossplane.io/v1alpha1"
@@ -11,14 +12,14 @@ const apiVersion = "shipa.crossplane.io/v1alpha1"
 func Generate(cfg shipa.Config) *shipa.Result {
 	var resource []interface{}
 
-	app := genApp(cfg)
-	if app != nil {
-		resource = append(resource, app)
-	}
-
 	appDeploy := genAppDeploy(cfg)
 	if appDeploy != nil {
 		resource = append(resource, appDeploy)
+	} else {
+		app := genApp(cfg)
+		if app != nil {
+			resource = append(resource, app)
+		}
 	}
 
 	appCname := genAppCname(cfg)
@@ -73,16 +74,47 @@ func genAppDeploy(cfg shipa.Config) *AppDeploy {
 		Kind:       "AppDeploy",
 	}
 	appDeploy.Metadata.Name = cfg.AppName
-	appDeploy.Spec.ForProvider = AppDeployForProvider{
-		App:            cfg.AppName,
-		Image:          cfg.Image,
-		RegistryUser:   cfg.RegistryUser,
-		RegistrySecret: cfg.RegistrySecret,
-		Port:           cfg.Port,
-		PrivateImage:   cfg.RegistryUser != "" || cfg.RegistrySecret != "",
+	appDeploy.Spec.ForProvider = AppDeployParameters{
+		App:   cfg.AppName,
+		Image: cfg.Image,
+		AppConfig: AppDeployConfig{
+			Team:      cfg.Team,
+			Framework: cfg.Framework,
+			Plan:      cfg.Plan,
+			Tags:      utils.ParseValues(cfg.Tags),
+		},
+		Registry: genAppDeployRegistry(cfg),
+		Port:     genAppDeployPort(cfg),
 	}
 
 	return appDeploy
+}
+
+func genAppDeployPort(cfg shipa.Config) *AppDeployPort {
+	if cfg.Port == "" {
+		return nil
+	}
+
+	port, err := strconv.ParseInt(cfg.Port, 10, 64)
+	if err != nil {
+		return nil
+	}
+
+	return &AppDeployPort{
+		Number:   port,
+		Protocol: "TCP",
+	}
+}
+
+func genAppDeployRegistry(cfg shipa.Config) *AppDeployRegistry {
+	if cfg.RegistryUser == "" || cfg.RegistrySecret == "" {
+		return nil
+	}
+
+	return &AppDeployRegistry{
+		User:   cfg.RegistryUser,
+		Secret: cfg.RegistrySecret,
+	}
 }
 
 func genAppCname(cfg shipa.Config) *AppCname {

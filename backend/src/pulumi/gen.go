@@ -7,10 +7,6 @@ import (
 func Generate(cfg shipa.Config) *shipa.Result {
 	content := genMain()
 
-	if hasApp(cfg) {
-		content += genApp(cfg)
-	}
-
 	if hasAppCname(cfg) {
 		content += genAppCname(cfg)
 	}
@@ -21,6 +17,10 @@ func Generate(cfg shipa.Config) *shipa.Result {
 
 	if hasAppDeploy(cfg) {
 		content += genAppDeploy(cfg)
+	} else {
+		if hasApp(cfg) {
+			content += genApp(cfg)
+		}
 	}
 
 	return &shipa.Result{
