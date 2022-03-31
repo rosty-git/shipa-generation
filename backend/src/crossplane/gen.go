@@ -1,6 +1,7 @@
 package crossplane
 
 import (
+	"encoding/json"
 	"gopkg.in/yaml.v2"
 	"shipa-gen/src/shipa"
 	"shipa-gen/src/utils"
@@ -30,6 +31,11 @@ func Generate(cfg shipa.Config) *shipa.Result {
 	appEnv := genAppEnv(cfg)
 	if appEnv != nil {
 		resource = append(resource, appEnv)
+	}
+
+	policy := genNetworkPolicy(cfg)
+	if policy != nil {
+		resource = append(resource, policy)
 	}
 
 	if len(resource) == 0 {
@@ -158,4 +164,24 @@ func genAppEnv(cfg shipa.Config) *AppEnv {
 	}
 
 	return appEnv
+}
+
+func genNetworkPolicy(cfg shipa.Config) *NetworkPolicy {
+	if cfg.AppName == "" || cfg.NetworkPolicy == nil {
+		return nil
+	}
+
+	policy := &NetworkPolicy{
+		ApiVersion: apiVersion,
+		Kind:       "NetworkPolicy",
+	}
+	policy.Metadata.Name = cfg.AppName
+	p := &policy.Spec.ForProvider
+	p.App = cfg.AppName
+	p.NetworkPolicy = &NetworkPolicyDetails{}
+
+	data, _ := json.Marshal(cfg.NetworkPolicy)
+	json.Unmarshal(data, p.NetworkPolicy)
+
+	return policy
 }

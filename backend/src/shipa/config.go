@@ -28,6 +28,8 @@ type Config struct {
 	Envs      []Env `json:"envs"`
 	Norestart bool  `json:"norestart"`
 	Private   bool  `json:"private"`
+
+	NetworkPolicy *NetworkPolicy `json:"network-policy,omitempty"`
 }
 
 type Env struct {

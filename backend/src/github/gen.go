@@ -1,6 +1,7 @@
 package github
 
 import (
+	"encoding/json"
 	"gopkg.in/yaml.v2"
 	"shipa-gen/src/shipa"
 	"shipa-gen/src/utils"
@@ -10,6 +11,7 @@ import (
 func Generate(cfg shipa.Config) *shipa.Result {
 	var action Action
 
+	action.NetworkPolicy = genNetworkPolicy(cfg)
 	action.AppEnv = genAppEnv(cfg)
 	action.AppCname = genAppCname(cfg)
 	action.AppDeploy = genAppDeploy(cfg)
@@ -120,4 +122,16 @@ func genAppEnv(cfg shipa.Config) *AppEnv {
 		NoRestart: cfg.Norestart,
 		Private:   cfg.Private,
 	}
+}
+
+func genNetworkPolicy(cfg shipa.Config) *NetworkPolicy {
+	if cfg.AppName == "" || cfg.NetworkPolicy == nil {
+		return nil
+	}
+
+	policy := &NetworkPolicy{App: cfg.AppName}
+	data, _ := json.Marshal(cfg.NetworkPolicy)
+	json.Unmarshal(data, policy)
+
+	return policy
 }

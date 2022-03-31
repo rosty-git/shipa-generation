@@ -23,6 +23,10 @@ func Generate(cfg shipa.Config) *shipa.Result {
 		}
 	}
 
+	if hasNetworkPolicy(cfg) {
+		content += genNetworkPolicy(cfg)
+	}
+
 	return &shipa.Result{
 		Name:    "main.tf",
 		Content: content,

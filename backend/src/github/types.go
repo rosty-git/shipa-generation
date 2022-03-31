@@ -1,10 +1,11 @@
 package github
 
 type Action struct {
-	App       *App       `yaml:"app,omitempty"`
-	AppEnv    *AppEnv    `yaml:"app-env,omitempty"`
-	AppCname  *AppCname  `yaml:"app-cname,omitempty"`
-	AppDeploy *AppDeploy `yaml:"app-deploy,omitempty"`
+	App           *App           `yaml:"app,omitempty"`
+	AppEnv        *AppEnv        `yaml:"app-env,omitempty"`
+	AppCname      *AppCname      `yaml:"app-cname,omitempty"`
+	AppDeploy     *AppDeploy     `yaml:"app-deploy,omitempty"`
+	NetworkPolicy *NetworkPolicy `yaml:"network-policy,omitempty"`
 }
 
 type App struct {

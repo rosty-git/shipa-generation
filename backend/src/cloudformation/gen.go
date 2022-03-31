@@ -1,6 +1,7 @@
 package cloudformation
 
 import (
+	"encoding/json"
 	"gopkg.in/yaml.v2"
 	"shipa-gen/src/shipa"
 	"shipa-gen/src/utils"
@@ -35,6 +36,11 @@ func Generate(cfg shipa.Config) *shipa.Result {
 		resource = append(resource, appEnv)
 	}
 
+	policy := genNetworkPolicy(cfg)
+	if policy != nil {
+		resource = append(resource, policy)
+	}
+
 	if len(resource) == 0 {
 		return nil
 	}
@@ -51,23 +57,22 @@ func genApp(cfg shipa.Config) *App {
 		return nil
 	}
 
-	app := &App{
+	return &App{
 		Resources: AppResource{
 			MyShipaApp: MyShipaApp{
 				Type: "Shipa::Application::Item",
+				Properties: AppProperties{
+					Name:       cfg.AppName,
+					ShipaHost:  shipaHost,
+					ShipaToken: shipaToken,
+					Teamowner:  cfg.Team,
+					Framework:  cfg.Framework,
+					Plan:       cfg.Plan,
+					Tags:       utils.ParseValues(cfg.Tags),
+				},
 			},
 		},
 	}
-	p := &app.Resources.MyShipaApp.Properties
-	p.ShipaHost = shipaHost
-	p.ShipaToken = shipaToken
-	p.Name = cfg.AppName
-	p.Teamowner = cfg.Team
-	p.Framework = cfg.Framework
-	p.Plan = cfg.Plan
-	p.Tags = utils.ParseValues(cfg.Tags)
-
-	return app
 }
 
 func genAppDeploy(cfg shipa.Config) *AppDeploy {
@@ -75,28 +80,27 @@ func genAppDeploy(cfg shipa.Config) *AppDeploy {
 		return nil
 	}
 
-	appDeploy := &AppDeploy{
+	return &AppDeploy{
 		Resources: AppDeployResource{
 			MyShipaAppDeploy: MyShipaAppDeploy{
 				Type: "Shipa::AppDeploy::Item",
+				Properties: AppDeployProperties{
+					App:        cfg.AppName,
+					ShipaHost:  shipaHost,
+					ShipaToken: shipaToken,
+					Image:      cfg.Image,
+					Registry:   genAppDeployRegistry(cfg),
+					Port:       genAppDeployPort(cfg),
+					AppConfig: AppConfig{
+						Team:      cfg.Team,
+						Framework: cfg.Framework,
+						Plan:      cfg.Plan,
+						Tags:      utils.ParseValues(cfg.Tags),
+					},
+				},
 			},
 		},
 	}
-	p := &appDeploy.Resources.MyShipaAppDeploy.Properties
-	p.ShipaHost = shipaHost
-	p.ShipaToken = shipaToken
-	p.App = cfg.AppName
-	p.Image = cfg.Image
-	p.AppConfig = AppConfig{
-		Team:      cfg.Team,
-		Framework: cfg.Framework,
-		Plan:      cfg.Plan,
-		Tags:      utils.ParseValues(cfg.Tags),
-	}
-	p.Registry = genAppDeployRegistry(cfg)
-	p.Port = genAppDeployPort(cfg)
-
-	return appDeploy
 }
 
 func genAppDeployRegistry(cfg shipa.Config) *Registry {
@@ -131,28 +135,29 @@ func genAppEnv(cfg shipa.Config) *AppEnv {
 		return nil
 	}
 
-	appEnv := &AppEnv{
-		Resources: AppEnvResource{
-			MyShipaAppEnv: MyShipaAppEnv{
-				Type: "Shipa::AppEnv::Item",
-			},
-		},
-	}
-
-	p := &appEnv.Resources.MyShipaAppEnv.Properties
-	p.ShipaHost = shipaHost
-	p.ShipaToken = shipaToken
-	p.App = cfg.AppName
-	p.Norestart = cfg.Norestart
-	p.Private = cfg.Private
+	var envs []Env
 	for _, env := range cfg.Envs {
-		p.Envs = append(p.Envs, Env{
+		envs = append(envs, Env{
 			Name:  env.Name,
 			Value: env.Value,
 		})
 	}
 
-	return appEnv
+	return &AppEnv{
+		Resources: AppEnvResource{
+			MyShipaAppEnv: MyShipaAppEnv{
+				Type: "Shipa::AppEnv::Item",
+				Properties: AppEnvProperties{
+					App:        cfg.AppName,
+					ShipaHost:  shipaHost,
+					ShipaToken: shipaToken,
+					Norestart:  cfg.Norestart,
+					Private:    cfg.Private,
+					Envs:       envs,
+				},
+			},
+		},
+	}
 }
 
 func genAppCname(cfg shipa.Config) *AppCname {
@@ -160,20 +165,42 @@ func genAppCname(cfg shipa.Config) *AppCname {
 		return nil
 	}
 
-	appCname := &AppCname{
+	return &AppCname{
 		Resources: AppCnameResource{
 			MyShipaAppCname: MyShipaAppCname{
 				Type: "Shipa::AppCname::Item",
+				Properties: AppCnameProperties{
+					App:        cfg.AppName,
+					ShipaHost:  shipaHost,
+					ShipaToken: shipaToken,
+					Cname:      cfg.Cname,
+					Encrypt:    cfg.Encrypt,
+				},
+			},
+		},
+	}
+}
+
+func genNetworkPolicy(cfg shipa.Config) *NetworkPolicy {
+	if cfg.AppName == "" || cfg.Cname == "" {
+		return nil
+	}
+
+	policy := &NetworkPolicy{
+		Resources: NetworkPolicyResource{
+			MyShipaNetworkPolicy: MyShipaNetworkPolicy{
+				Type: "Shipa::NetworkPolicy::Item",
+				Properties: NetworkPolicyProperties{
+					App:        cfg.AppName,
+					ShipaHost:  shipaHost,
+					ShipaToken: shipaToken,
+				},
 			},
 		},
 	}
 
-	p := &appCname.Resources.MyShipaAppCname.Properties
-	p.ShipaHost = shipaHost
-	p.ShipaToken = shipaToken
-	p.App = cfg.AppName
-	p.Cname = cfg.Cname
-	p.Encrypt = cfg.Encrypt
+	data, _ := json.Marshal(cfg.NetworkPolicy)
+	json.Unmarshal(data, &policy.Resources.MyShipaNetworkPolicy.Properties)
 
-	return appCname
+	return policy
 }

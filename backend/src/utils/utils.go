@@ -1,6 +1,9 @@
 package utils
 
-import "strings"
+import (
+	"encoding/json"
+	"strings"
+)
 
 func ParseValues(values string) (out []string) {
 	tokens := strings.Split(values, ",")
@@ -11,4 +14,9 @@ func ParseValues(values string) (out []string) {
 		}
 	}
 	return
+}
+
+func CopyJsonData(src, dst interface{}) {
+	data, _ := json.Marshal(src)
+	json.Unmarshal(data, dst)
 }

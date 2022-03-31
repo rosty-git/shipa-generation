@@ -20,6 +20,11 @@ func Generate(cfg shipa.Config) *shipa.Result {
 		play.Tasks = append(play.Tasks, appCname)
 	}
 
+	policy := genNetworkPolicy(cfg)
+	if policy != nil {
+		play.Tasks = append(play.Tasks, policy)
+	}
+
 	appDeploy := genAppDeploy(cfg)
 	if appDeploy != nil {
 		play.Tasks = append(play.Tasks, appDeploy)
@@ -144,5 +149,21 @@ func genApp(cfg shipa.Config) *AppTask {
 		Plan:      cfg.Plan,
 		Tags:      utils.ParseValues(cfg.Tags),
 	}
+	return t
+}
+
+func genNetworkPolicy(cfg shipa.Config) *NetworkPolicyTask {
+	if cfg.AppName == "" || cfg.NetworkPolicy == nil {
+		return nil
+	}
+
+	t := newNetworkPolicyTask()
+	t.NetworkPolicy = NetworkPolicy{
+		Shipa: credentials,
+		App:   cfg.AppName,
+	}
+
+	utils.CopyJsonData(cfg.NetworkPolicy, &t.NetworkPolicy)
+
 	return t
 }
