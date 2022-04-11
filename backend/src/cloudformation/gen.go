@@ -91,6 +91,7 @@ func genAppDeploy(cfg shipa.Config) *AppDeploy {
 					Image:      cfg.Image,
 					Registry:   genAppDeployRegistry(cfg),
 					Port:       genAppDeployPort(cfg),
+					Volumes:    genAppDeployVolumes(cfg),
 					AppConfig: AppConfig{
 						Team:      cfg.Team,
 						Framework: cfg.Framework,
@@ -100,6 +101,37 @@ func genAppDeploy(cfg shipa.Config) *AppDeploy {
 				},
 			},
 		},
+	}
+}
+
+func genAppDeployVolumes(cfg shipa.Config) (volumes []*AppDeployVolume) {
+	for _, volume := range cfg.Volumes {
+		volumes = append(volumes, genAppDeployVolume(volume))
+	}
+	return
+}
+
+func genAppDeployVolume(volume *shipa.Volume) *AppDeployVolume {
+	if volume == nil {
+		return nil
+	}
+
+	return &AppDeployVolume{
+		Name:    volume.Name,
+		Path:    volume.Path,
+		Options: genVolumeOptions(volume.Opts),
+	}
+}
+
+func genVolumeOptions(opts *shipa.VolumeOptions) *VolumeOptions {
+	if opts == nil {
+		return nil
+	}
+
+	return &VolumeOptions{
+		Prop1: opts.Prop1,
+		Prop2: opts.Prop2,
+		Prop3: opts.Prop3,
 	}
 }
 

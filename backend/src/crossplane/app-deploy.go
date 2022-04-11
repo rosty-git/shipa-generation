@@ -19,7 +19,7 @@ type AppDeployParameters struct {
 	PodAutoScaler  *AppDeployPodAutoScaler  `json:"podAutoScaler,omitempty" yaml:"podAutoScaler,omitempty"`
 	Port           *AppDeployPort           `json:"port,omitempty" yaml:"port,omitempty"`
 	Registry       *AppDeployRegistry       `json:"registry,omitempty" yaml:"registry,omitempty"`
-	Volumes        []*AppDeployVolume       `json:"volumesToBind,omitempty" yaml:"volumesToBind,omitempty"`
+	Volumes        []*AppDeployVolume       `json:"volumes,omitempty" yaml:"volumes,omitempty"`
 }
 
 // AppDeployConfig - represents app deploy config
@@ -50,7 +50,7 @@ type AppDeployPodAutoScaler struct {
 // AppDeployPort - represents app deploy port
 type AppDeployPort struct {
 	Number   int64  `json:"number" yaml:"number"`
-	Protocol string `json:"protocol" yaml:"protocol"`
+	Protocol string `json:"protocol,omitempty" yaml:"protocol,omitempty"`
 }
 
 // AppDeployRegistry - represents app deploy registry
@@ -61,14 +61,14 @@ type AppDeployRegistry struct {
 
 // AppDeployVolume - represents app deploy volume
 type AppDeployVolume struct {
-	Name    string        `json:"volumeName" yaml:"volumeName"`
-	Path    string        `json:"volumeMountPath" yaml:"volumeMountPath"`
-	Options VolumeOptions `json:"volumeMountOptions" yaml:"volumeMountOptions"`
+	Name    string         `json:"name" yaml:"name"`
+	Path    string         `json:"mountPath" yaml:"mountPath"`
+	Options *VolumeOptions `json:"mountOptions,omitempty" yaml:"mountOptions,omitempty"`
 }
 
 // VolumeOptions - represents additional volume options
 type VolumeOptions struct {
-	Prop1 string `json:"additionalProp1" yaml:"additionalProp1"`
-	Prop2 string `json:"additionalProp2" yaml:"additionalProp2"`
-	Prop3 string `json:"additionalProp3" yaml:"additionalProp3"`
+	Prop1 string `json:"additionalProp1,omitempty" yaml:"additionalProp1,omitempty"`
+	Prop2 string `json:"additionalProp2,omitempty" yaml:"additionalProp2,omitempty"`
+	Prop3 string `json:"additionalProp3,omitempty" yaml:"additionalProp3,omitempty"`
 }

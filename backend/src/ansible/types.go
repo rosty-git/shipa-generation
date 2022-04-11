@@ -96,11 +96,24 @@ func newAppDeployTask() *AppDeployTask {
 
 type AppDeploy struct {
 	Shipa     `yaml:",inline"`
-	App       string     `yaml:"app"`
-	Image     string     `yaml:"image"`
-	AppConfig *AppConfig `yaml:"appConfig"`
-	Registry  *Registry  `yaml:"registry,omitempty"`
-	Port      *Port      `yaml:"port,omitempty"`
+	App       string             `yaml:"app"`
+	Image     string             `yaml:"image"`
+	AppConfig *AppConfig         `yaml:"appConfig"`
+	Registry  *Registry          `yaml:"registry,omitempty"`
+	Port      *Port              `yaml:"port,omitempty"`
+	Volumes   []*AppDeployVolume `yaml:"volumes,omitempty"`
+}
+
+type AppDeployVolume struct {
+	Name    string         `yaml:"name"`
+	Path    string         `yaml:"mountPath"`
+	Options *VolumeOptions `yaml:"mountOptions,omitempty"`
+}
+
+type VolumeOptions struct {
+	Prop1 string `yaml:"additionalProp1,omitempty"`
+	Prop2 string `yaml:"additionalProp2,omitempty"`
+	Prop3 string `yaml:"additionalProp3,omitempty"`
 }
 
 type Port struct {

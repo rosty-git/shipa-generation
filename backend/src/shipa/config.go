@@ -30,6 +30,7 @@ type Config struct {
 	Private   bool  `json:"private"`
 
 	NetworkPolicy *NetworkPolicy `json:"network-policy,omitempty"`
+	Volumes       []*Volume      `json:"volumes,omitempty"`
 }
 
 type Env struct {
@@ -40,4 +41,16 @@ type Env struct {
 type Result struct {
 	Name    string `json:"name"`
 	Content string `json:"content"`
+}
+
+type Volume struct {
+	Name string         `json:"name"`
+	Path string         `json:"mountPath"`
+	Opts *VolumeOptions `json:"mountOptions,omitempty"`
+}
+
+type VolumeOptions struct {
+	Prop1 string `json:"additionalProp1,omitempty"`
+	Prop2 string `json:"additionalProp2,omitempty"`
+	Prop3 string `json:"additionalProp3,omitempty"`
 }
